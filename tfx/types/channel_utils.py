@@ -146,6 +146,7 @@ def external_pipeline_artifact_query(
     producer_component_id: str,
     output_key: str,
     pipeline_run_id: str = '',
+    tags: Sequence[str] = (),
 ) -> channel.ExternalPipelineChannel:
   """Helper function to construct a query to get artifacts from an external pipeline.
 
@@ -157,6 +158,7 @@ def external_pipeline_artifact_query(
     output_key: The output key when producer component produces the artifacts in
       this Channel.
     pipeline_run_id: (Optional) Pipeline run id the artifacts belong to.
+    tags: (Optional) Tags to filter the artifacts.
 
   Returns:
     channel.ExternalPipelineChannel instance.
@@ -174,6 +176,7 @@ def external_pipeline_artifact_query(
       producer_component_id=producer_component_id,
       output_key=output_key,
       pipeline_run_id=pipeline_run_id,
+      tags=tags,
   )
 
 

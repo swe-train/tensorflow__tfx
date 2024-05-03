@@ -14,7 +14,7 @@
 """Compiler submodule specialized for NodeInputs."""
 
 from collections.abc import Iterable
-from typing import Type, cast
+from typing import Optional, Type, cast
 
 from tfx import types
 from tfx.dsl.compiler import compiler_context
@@ -137,12 +137,16 @@ def _compile_input_graph(
 def _compile_channel_pb_contexts(
     context_types_and_names: Iterable[tuple[str, pipeline_pb2.Value]],
     result: pipeline_pb2.InputSpec.Channel,
+    property_predicate: Optional[pipeline_pb2.PropertyPredicate] = None,
 ):
   """Adds contexts to the channel."""
   for context_type, context_value in context_types_and_names:
     ctx = result.context_queries.add()
     ctx.type.name = context_type
-    ctx.name.CopyFrom(context_value)
+    if context_value:
+      ctx.name.CopyFrom(context_value)
+    if property_predicate:
+      ctx.property_predicate.CopyFrom(property_predicate)
 
 
 def _compile_channel_pb(
@@ -248,6 +252,27 @@ def _compile_input_spec(
           )],
           result_input_channel,
       )
+
+    if channel.tags:
+      for tag in channel.tags:
+        property_predicate = pipeline_pb2.PropertyPredicate(
+            value_comparator=pipeline_pb2.PropertyPredicate.ValueComparator(
+                op=pipeline_pb2.PropertyPredicate.ValueComparator.Op.EQ,
+                property_name='__tag_' + tag + '__',
+                target_value=pipeline_pb2.Value(
+                    field_value=metadata_store_pb2.Value(bool_value=True)
+                ),
+                is_custom_property=True,
+            )
+        )
+        _compile_channel_pb_contexts(
+            [(
+                constants.PIPELINE_RUN_CONTEXT_TYPE_NAME,
+                _get_tfx_value(''),
+            )],
+            result_input_channel,
+            property_predicate,
+        )
 
     if pipeline_ctx.pipeline.platform_config:
       project_config = (

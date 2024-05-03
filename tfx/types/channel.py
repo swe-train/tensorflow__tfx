@@ -716,6 +716,7 @@ class ExternalPipelineChannel(BaseChannel):
       producer_component_id: str,
       output_key: str,
       pipeline_run_id: str = '',
+      tags: Sequence[str] = (),
   ):
     """Initialization of ExternalPipelineChannel.
 
@@ -727,6 +728,7 @@ class ExternalPipelineChannel(BaseChannel):
       output_key: The output key when producer component produces the artifacts
         in this Channel.
       pipeline_run_id: (Optional) Pipeline run id the artifacts belong to.
+      tags: (Optional) A list of tags the artifacts belong to
     """
     super().__init__(type=artifact_type)
     self.owner = owner
@@ -734,6 +736,7 @@ class ExternalPipelineChannel(BaseChannel):
     self.producer_component_id = producer_component_id
     self.output_key = output_key
     self.pipeline_run_id = pipeline_run_id
+    self.tags = tags
 
   def get_data_dependent_node_ids(self) -> Set[str]:
     return set()
@@ -745,7 +748,8 @@ class ExternalPipelineChannel(BaseChannel):
         f'pipeline_name={self.pipeline_name}, '
         f'producer_component_id={self.producer_component_id}, '
         f'output_key={self.output_key}, '
-        f'pipeline_run_id={self.pipeline_run_id})'
+        f'pipeline_run_id={self.pipeline_run_id}), '
+        f'tags={self.tags}'
     )
 
 
