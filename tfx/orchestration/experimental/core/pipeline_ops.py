@@ -1192,7 +1192,9 @@ def revive_pipeline_run(
           message='Cannot revive a live pipeline run.',
       )
     if not env.get_env().concurrent_pipeline_runs_enabled(pipeline) and (
-        all_active := pstate.PipelineState.load_all_active(mlmd_handle)
+        all_active := pstate.PipelineState.load_all_active_and_owned(
+            mlmd_handle
+        )
     ):
       raise status_lib.StatusNotOkError(
           code=status_lib.Code.INVALID_ARGUMENT,
@@ -1293,7 +1295,7 @@ def orchestrate(
   if filter_fn is None:
     filter_fn = lambda _: True
 
-  all_pipeline_states = pstate.PipelineState.load_all_active(
+  all_pipeline_states = pstate.PipelineState.load_all_active_and_owned(
       mlmd_connection_manager.primary_mlmd_handle
   )
   pipeline_states = [s for s in all_pipeline_states if filter_fn(s)]
